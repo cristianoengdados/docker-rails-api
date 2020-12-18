@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+   bando_de_dados:
+      ports:
+          - "5432:5432"
+      image: postgres:9.3
+      restart: "always"
+      volumes:
+          - ./resources/scripts /postgresql:/docker-entrypoint-initdb.d
+      environment:
+          POSTGRES_DB: docker_rails_api_development
+          POSTGRES_USER: teste
+          POSTGRES_PASSWORD: teste
+
+   aplicacao_web:
+      restart: "no"
+      build: .
+      command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+      ports: ["3000:3000"]
+      links:
+          - bando_de_dados
+      volumes:
+          - ./:/var/www/html
+      working_dir: /var/www/html
+      expose:
+          - 3000
+volumes:
+    rails_api_data:
+
+networks:
+    default:
+        external:
+            name: "intranet"
+
